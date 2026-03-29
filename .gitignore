@@ -35,6 +35,8 @@ yarn-error.log*
 
 # SQLite database (contains passwords — never commit)
 database.sqlite
+database.sqlite-shm
+database.sqlite-wal
 
 # vercel
 .vercel
