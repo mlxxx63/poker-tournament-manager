@@ -21,7 +21,7 @@ export async function GET(
     .prepare('SELECT * FROM payouts WHERE tournament_id = ? ORDER BY position')
     .all(Number(id));
 
-  return NextResponse.json({ ...tournament as object, blind_levels, payouts });
+  return NextResponse.json({ ...(tournament as object), blind_levels, payouts });
 }
 
 export async function PUT(
@@ -33,7 +33,6 @@ export async function PUT(
 
   const { id } = await params;
   const body = await req.json();
-  const { name, date, buy_in_dollars, starting_chips, status } = body;
 
   const db = getDb();
   const existing = db.prepare('SELECT id FROM tournaments WHERE id = ?').get(Number(id));
@@ -42,11 +41,41 @@ export async function PUT(
   const fields: string[] = [];
   const values: unknown[] = [];
 
-  if (name !== undefined) { fields.push('name = ?'); values.push(name.trim()); }
-  if (date !== undefined) { fields.push('date = ?'); values.push(date); }
-  if (buy_in_dollars !== undefined) { fields.push('buy_in = ?'); values.push(Math.round(buy_in_dollars * 100)); }
-  if (starting_chips !== undefined) { fields.push('starting_chips = ?'); values.push(Number(starting_chips)); }
-  if (status !== undefined) { fields.push('status = ?'); values.push(status); }
+  const strFields = ['name', 'date', 'status'] as const;
+  for (const f of strFields) {
+    if (body[f] !== undefined) {
+      fields.push(`${f} = ?`);
+      values.push(typeof body[f] === 'string' ? body[f].trim() : body[f]);
+    }
+  }
+
+  const centFields = ['buy_in_dollars', 'addon_cost_dollars'] as const;
+  const centDbFields = ['buy_in', 'addon_cost'] as const;
+  for (let i = 0; i < centFields.length; i++) {
+    if (body[centFields[i]] !== undefined) {
+      fields.push(`${centDbFields[i]} = ?`);
+      values.push(Math.round(body[centFields[i]] * 100));
+    }
+  }
+
+  const numFields = [
+    'starting_chips', 'estimated_entries', 'max_re_entries',
+    're_entry_period_level', 're_entry_chips', 'addon_chips',
+  ] as const;
+  for (const f of numFields) {
+    if (body[f] !== undefined) {
+      fields.push(`${f} = ?`);
+      values.push(Number(body[f]));
+    }
+  }
+
+  const boolFields = ['re_entries_allowed', 'addon_allowed'] as const;
+  for (const f of boolFields) {
+    if (body[f] !== undefined) {
+      fields.push(`${f} = ?`);
+      values.push(body[f] ? 1 : 0);
+    }
+  }
 
   if (fields.length === 0) return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
 
