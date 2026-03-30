@@ -10,7 +10,7 @@ export const proxy = withAuth({
   },
 });
 
-// Protect all /admin routes except /admin/login
+// Protect / and all /admin routes except /admin/login
 export const config = {
-  matcher: ['/admin/((?!login$|login/).*)'],
+  matcher: ['/', '/admin', '/admin/((?!login$|login/).*)'],
 };
