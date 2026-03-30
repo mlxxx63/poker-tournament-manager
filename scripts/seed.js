@@ -90,20 +90,21 @@ const displayName = process.env.OWNER_DISPLAY_NAME || 'Admin';
 
 const passwordHash = bcrypt.hashSync(password, 12);
 
-try {
+const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
+
+if (existing) {
+  db.prepare(
+    'UPDATE users SET password_hash = ?, display_name = ?, role = ? WHERE username = ?'
+  ).run(passwordHash, displayName, 'owner', username);
+  console.log(`✓ Owner account updated: ${username}`);
+} else {
   db.prepare(
     'INSERT INTO users (username, display_name, password_hash, role) VALUES (?, ?, ?, ?)'
   ).run(username, displayName, passwordHash, 'owner');
   console.log(`✓ Owner account created: ${username}`);
-  console.log(`  Display name: ${displayName}`);
-  console.log(`  Role: owner`);
-  console.log('\nYou can now log in at http://localhost:3000/admin/login');
-} catch (e) {
-  if (e.message && e.message.includes('UNIQUE constraint failed')) {
-    console.log(`ℹ  User "${username}" already exists — skipping.`);
-  } else {
-    throw e;
-  }
 }
+console.log(`  Display name: ${displayName}`);
+console.log(`  Role: owner`);
+console.log('\nYou can now log in at /admin/login');
 
 db.close();

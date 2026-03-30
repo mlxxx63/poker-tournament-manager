@@ -104,12 +104,24 @@ export default async function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
-                      <Link
-                        href={`/admin/tournament/${t.id}`}
-                        className="text-purple-400 hover:text-purple-300 text-xs font-medium transition"
-                      >
-                        Manage →
-                      </Link>
+                      <div className="flex items-center justify-end gap-3">
+                        {(t.status === 'running' || t.status === 'paused') && (
+                          <Link
+                            href={`/display/${t.id}`}
+                            target="_blank"
+                            className="text-purple-500 hover:text-purple-300 text-xs transition"
+                            title="Open display"
+                          >
+                            Display ↗
+                          </Link>
+                        )}
+                        <Link
+                          href={`/admin/tournament/${t.id}`}
+                          className="text-purple-400 hover:text-purple-300 text-xs font-medium transition"
+                        >
+                          Manage →
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

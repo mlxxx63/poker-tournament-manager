@@ -73,6 +73,7 @@ function initializeSchema(db: Database.Database) {
       player_name TEXT NOT NULL,
       seat_number TEXT,
       entries INTEGER DEFAULT 1,
+      addons INTEGER DEFAULT 0,
       chips INTEGER DEFAULT 0,
       status TEXT DEFAULT 'active',
       finish_position INTEGER,
@@ -94,6 +95,7 @@ function migrate(db: Database.Database) {
     ['tournaments', 'addon_allowed INTEGER DEFAULT 0'],
     ['tournaments', 'addon_chips INTEGER DEFAULT 0'],
     ['tournaments', 'addon_cost INTEGER DEFAULT 0'],
+    ['tournament_players', 'addons INTEGER DEFAULT 0'],
   ];
 
   for (const [table, columnDef] of newColumns) {

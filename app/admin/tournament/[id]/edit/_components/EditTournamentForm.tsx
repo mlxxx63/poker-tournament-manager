@@ -49,10 +49,6 @@ export default function EditTournamentForm({ tournament, initialLevels, initialP
   const [reEntryPeriodLevel, setReEntryPeriodLevel] = useState<number | ''>(
     toNum(tournament.re_entry_period_level) || ''
   );
-  const storedReChips = toNum(tournament.re_entry_chips);
-  const [reEntryChipsCustom, setReEntryChipsCustom] = useState(storedReChips > 0);
-  const [reEntryChips, setReEntryChips] = useState<number | ''>(storedReChips || '');
-
   // ── Add-ons ────────────────────────────────────────────────────────────
   const [addonAllowed, setAddonAllowed] = useState(Boolean(tournament.addon_allowed));
   const [addonChips, setAddonChips] = useState<number | ''>(toNum(tournament.addon_chips) || '');
@@ -106,7 +102,7 @@ export default function EditTournamentForm({ tournament, initialLevels, initialP
           re_entries_allowed: reEntriesAllowed,
           max_re_entries: maxReEntries === 'unlimited' ? 0 : maxReEntries,
           re_entry_period_level: reEntryPeriodLevel === '' ? 0 : reEntryPeriodLevel,
-          re_entry_chips: reEntryChipsCustom ? (reEntryChips === '' ? 0 : reEntryChips) : 0,
+          re_entry_chips: 0,
           addon_allowed: addonAllowed,
           addon_chips: addonChips === '' ? 0 : addonChips,
           addon_cost_dollars: addonCostSameAsBuyIn ? (buyIn === '' ? 0 : buyIn) : (addonCostDollars === '' ? 0 : addonCostDollars),
@@ -249,16 +245,6 @@ export default function EditTournamentForm({ tournament, initialLevels, initialP
                     <label className="block text-xs text-gray-400 mb-1.5">Re-entry period closes after level (0 = open all tournament)</label>
                     <input type="number" min="0" value={reEntryPeriodLevel} onChange={(e) => setReEntryPeriodLevel(e.target.value === '' ? '' : Number(e.target.value))} placeholder="6" className={inputClass} />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-400 mb-2">Re-entry chip stack</label>
-                  <div className="flex gap-2 mb-2">
-                    {toggle(!reEntryChipsCustom, () => setReEntryChipsCustom(false), 'Same as starting stack')}
-                    {toggle(reEntryChipsCustom, () => setReEntryChipsCustom(true), 'Custom amount')}
-                  </div>
-                  {reEntryChipsCustom && (
-                    <input type="number" min="1" value={reEntryChips} onChange={(e) => setReEntryChips(e.target.value === '' ? '' : Number(e.target.value))} placeholder={typeof startingChips === 'number' ? String(startingChips) : '10000'} className="mt-2 w-48 bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
-                  )}
                 </div>
               </div>
             )}

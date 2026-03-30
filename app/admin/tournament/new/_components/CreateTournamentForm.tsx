@@ -32,9 +32,6 @@ export default function CreateTournamentForm() {
   const [reEntriesAllowed, setReEntriesAllowed] = useState(false);
   const [maxReEntries, setMaxReEntries] = useState<'unlimited' | 1 | 2 | 3>('unlimited');
   const [reEntryPeriodLevel, setReEntryPeriodLevel] = useState<number | ''>(6);
-  const [reEntryChipsCustom, setReEntryChipsCustom] = useState(false);
-  const [reEntryChips, setReEntryChips] = useState<number | ''>('');
-
   // ── Add-ons ───────────────────────────────────────────────────────────────
   const [addonAllowed, setAddonAllowed] = useState(false);
   const [addonChips, setAddonChips] = useState<number | ''>('');
@@ -76,7 +73,7 @@ export default function CreateTournamentForm() {
           re_entries_allowed: reEntriesAllowed,
           max_re_entries: maxReEntries === 'unlimited' ? 0 : maxReEntries,
           re_entry_period_level: reEntryPeriodLevel === '' ? 0 : reEntryPeriodLevel,
-          re_entry_chips: reEntryChipsCustom ? (reEntryChips === '' ? 0 : reEntryChips) : 0,
+          re_entry_chips: 0,
           addon_allowed: addonAllowed,
           addon_chips: addonChips === '' ? 0 : addonChips,
           addon_cost_dollars: addonCostSameAsBuyIn ? (buyIn === '' ? 0 : buyIn) : (addonCostDollars === '' ? 0 : addonCostDollars),
@@ -205,22 +202,6 @@ export default function CreateTournamentForm() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs text-gray-400 mb-2">Re-entry chip stack</label>
-                  <div className="flex gap-2 mb-2">
-                    {toggle(!reEntryChipsCustom, () => setReEntryChipsCustom(false), 'Same as starting stack')}
-                    {toggle(reEntryChipsCustom, () => setReEntryChipsCustom(true), 'Custom amount')}
-                  </div>
-                  {reEntryChipsCustom && (
-                    <input
-                      type="number" min="1"
-                      value={reEntryChips}
-                      onChange={(e) => setReEntryChips(e.target.value === '' ? '' : Number(e.target.value))}
-                      placeholder={typeof startingChips === 'number' ? String(startingChips) : '10000'}
-                      className="mt-2 w-48 bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    />
-                  )}
-                </div>
               </div>
             )}
           </div>

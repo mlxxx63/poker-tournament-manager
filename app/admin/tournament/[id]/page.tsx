@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import AdminShell from '../../_components/AdminShell';
+import DeleteTournamentButton from './_components/DeleteTournamentButton';
 import getDb from '@/lib/db';
 
 interface Tournament {
@@ -97,12 +98,15 @@ export default async function TournamentDetailPage({
               </span>
             </div>
           </div>
-          <Link
-            href={`/admin/tournament/${tournament.id}/edit`}
-            className="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition"
-          >
-            Edit Tournament
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/admin/tournament/${tournament.id}/edit`}
+              className="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              Edit Tournament
+            </Link>
+            <DeleteTournamentButton tournamentId={tournament.id} tournamentName={tournament.name} />
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -222,11 +226,39 @@ export default async function TournamentDetailPage({
           </div>
         </div>
 
-        {/* Coming soon */}
-        <div className="mt-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <p className="text-gray-500 text-sm">
-            Player management and live controls coming in Phase 3 & 5.
-          </p>
+        {/* Action links */}
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <Link
+            href={`/admin/tournament/${tournament.id}/live`}
+            className="flex items-center justify-between bg-green-900/20 border border-green-900/50 hover:border-green-700/60 rounded-xl p-5 transition group"
+          >
+            <div>
+              <p className="text-sm font-semibold text-green-300">Live Controls</p>
+              <p className="text-xs text-gray-500 mt-0.5">Start, pause, skip levels</p>
+            </div>
+            <span className="text-green-700 group-hover:text-green-400 transition text-lg">→</span>
+          </Link>
+          <Link
+            href={`/admin/tournament/${tournament.id}/players`}
+            className="flex items-center justify-between bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition group"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-200">Players</p>
+              <p className="text-xs text-gray-500 mt-0.5">Add players, eliminations, re-entries</p>
+            </div>
+            <span className="text-gray-600 group-hover:text-gray-400 transition text-lg">→</span>
+          </Link>
+          <Link
+            href={`/display/${tournament.id}`}
+            target="_blank"
+            className="flex items-center justify-between bg-gray-900 border border-gray-800 hover:border-purple-800 rounded-xl p-5 transition group"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-200">Display</p>
+              <p className="text-xs text-gray-500 mt-0.5">Open clock for TV / phones</p>
+            </div>
+            <span className="text-purple-600 group-hover:text-purple-400 transition text-lg">↗</span>
+          </Link>
         </div>
       </main>
     </AdminShell>
