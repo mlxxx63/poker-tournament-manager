@@ -5,9 +5,9 @@ import { useState } from 'react';
 export interface Payout {
   position: number;
   amount_dollars: number | '';
+  percentage: number | '';  // 0 or '' = fixed dollar; >0 = % of pool
 }
 
-// Standard home-game percentage splits by places paid
 const PAYOUT_PRESETS: Record<number, number[]> = {
   1: [100],
   2: [65, 35],
@@ -38,9 +38,7 @@ interface Props {
 }
 
 export default function PayoutEditor({ buyInDollars, estimatedEntries, payouts, onChange }: Props) {
-  const [mode, setMode] = useState<'auto' | 'manual'>('auto');
-
-  const prizePool =
+  const estimatedPool =
     typeof buyInDollars === 'number' && typeof estimatedEntries === 'number'
       ? buyInDollars * estimatedEntries
       : 0;
@@ -50,156 +48,160 @@ export default function PayoutEditor({ buyInDollars, estimatedEntries, payouts, 
       ? suggestPlaces(estimatedEntries)
       : 3;
 
+  // Apply preset — stores as percentages
   function applyPreset(places: number) {
     const percentages = PAYOUT_PRESETS[places] ?? PAYOUT_PRESETS[3];
     onChange(
       percentages.map((pct, idx) => ({
         position: idx + 1,
-        amount_dollars: prizePool > 0 ? Math.round(prizePool * pct) / 100 : '',
+        amount_dollars: '',
+        percentage: pct,
       }))
     );
   }
 
-  function updateAmount(idx: number, value: number | '') {
-    onChange(payouts.map((p, i) => (i === idx ? { ...p, amount_dollars: value } : p)));
+  function toggleMode(idx: number, toPercent: boolean) {
+    onChange(payouts.map((p, i) => {
+      if (i !== idx) return p;
+      if (toPercent) return { ...p, amount_dollars: '', percentage: '' };
+      return { ...p, percentage: 0, amount_dollars: '' };
+    }));
+  }
+
+  function updateValue(idx: number, value: number | '', field: 'amount_dollars' | 'percentage') {
+    onChange(payouts.map((p, i) => (i === idx ? { ...p, [field]: value } : p)));
   }
 
   function addPlace() {
-    onChange([...payouts, { position: payouts.length + 1, amount_dollars: '' }]);
+    onChange([...payouts, { position: payouts.length + 1, amount_dollars: '', percentage: '' }]);
   }
 
   function removePlace(idx: number) {
     onChange(
-      payouts
-        .filter((_, i) => i !== idx)
-        .map((p, i) => ({ ...p, position: i + 1 }))
+      payouts.filter((_, i) => i !== idx).map((p, i) => ({ ...p, position: i + 1 }))
     );
   }
 
-  const totalPayout = payouts.reduce(
-    (sum, p) => sum + (typeof p.amount_dollars === 'number' ? p.amount_dollars : 0),
+  const totalPct = payouts.reduce(
+    (sum, p) => sum + (typeof p.percentage === 'number' && p.percentage > 0 ? p.percentage : 0),
     0
   );
 
-  const inputClass =
-    'w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500';
+  const totalFixed = payouts.reduce(
+    (sum, p) => sum + ((!p.percentage || p.percentage === 0) && typeof p.amount_dollars === 'number' ? p.amount_dollars : 0),
+    0
+  );
+
+  const inputCls = 'bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500';
 
   return (
     <div>
-      {/* Mode toggle */}
-      <div className="flex gap-1 mb-5 bg-gray-800 rounded-lg p-1 w-fit">
-        {(['auto', 'manual'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => setMode(m)}
-            className={`px-4 py-1.5 rounded-md text-xs font-medium transition capitalize ${
-              mode === m ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            {m === 'auto' ? 'Auto (suggested)' : 'Manual'}
-          </button>
-        ))}
-      </div>
-
-      {mode === 'auto' && (
-        <div className="mb-5 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
-          <p className="text-xs text-gray-400 mb-3">
-            Prize pool:{' '}
-            <span className="text-white font-medium">
-              {prizePool > 0 ? `$${prizePool.toFixed(2)}` : '—'}
-            </span>
-            {prizePool === 0 && (
-              <span className="ml-2 text-gray-600">(set buy-in + estimated entries above)</span>
-            )}
-          </p>
-
-          <p className="text-xs text-gray-400 mb-2">Places to pay:</p>
-          <div className="flex gap-2 flex-wrap">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => applyPreset(n)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
-                  n === suggestedPlaces
-                    ? 'border-purple-500 text-purple-300 bg-purple-900/30'
-                    : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
-                }`}
-              >
-                {n} place{n > 1 ? 's' : ''}
-                {n === suggestedPlaces && (
-                  <span className="ml-1 text-purple-400 text-xs">✓ suggested</span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {Object.entries(PAYOUT_PRESETS).map(([places, pcts]) => (
-            <div key={places} className="hidden" />
-          ))}
-
-          <p className="text-xs text-gray-600 mt-3">
-            Clicking a button populates the amounts below. Edit them freely after.
-          </p>
+      {/* Preset buttons */}
+      <div className="mb-5 p-4 bg-gray-800/50 border border-gray-700 rounded-xl">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-gray-400">Quick presets (% of prize pool):</p>
+          {estimatedPool > 0 && (
+            <p className="text-xs text-gray-500">
+              Est. pool: <span className="text-white">${estimatedPool.toFixed(0)}</span>
+            </p>
+          )}
         </div>
-      )}
+        <div className="flex gap-2 flex-wrap">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => applyPreset(n)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition border ${
+                n === suggestedPlaces
+                  ? 'border-purple-500 text-purple-300 bg-purple-900/30'
+                  : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-white'
+              }`}
+            >
+              {n} place{n > 1 ? 's' : ''}
+              {n === suggestedPlaces && <span className="ml-1 text-purple-400">✓</span>}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-600 mt-2">Presets use %. Amounts auto-update as re-entries add to the pool.</p>
+      </div>
 
       {/* Payout rows */}
       <div className="space-y-2">
-        {payouts.map((payout, idx) => (
-          <div key={idx} className="flex items-center gap-3">
-            <span className="text-xs text-gray-400 w-14 shrink-0 font-medium">
-              {ordinal(payout.position)}
-            </span>
-            {mode === 'auto' && prizePool > 0 && typeof payout.amount_dollars === 'number' && (
-              <span className="text-xs text-gray-500 w-12 shrink-0">
-                {Math.round((payout.amount_dollars / prizePool) * 100)}%
-              </span>
-            )}
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={payout.amount_dollars}
-                onChange={(e) => updateAmount(idx, e.target.value === '' ? '' : Number(e.target.value))}
-                placeholder="0.00"
-                className="w-36 bg-gray-800 border border-gray-700 text-white rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
+        {payouts.map((payout, idx) => {
+          const isPercent = typeof payout.percentage === 'number' && payout.percentage > 0
+            || (payout.percentage !== 0 && payout.percentage !== '' && payout.amount_dollars === '');
+          const calcAmount = isPercent && typeof payout.percentage === 'number' && estimatedPool > 0
+            ? (estimatedPool * payout.percentage / 100).toFixed(0)
+            : null;
+
+          return (
+            <div key={idx} className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <span className="text-xs text-gray-400 w-12 shrink-0">{ordinal(payout.position)}</span>
+
+              {/* Mode toggle */}
+              <div className="flex rounded-lg overflow-hidden border border-gray-700 shrink-0">
+                <button type="button" onClick={() => toggleMode(idx, false)}
+                  className={`px-2 py-1.5 text-xs transition ${!isPercent ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                  $
+                </button>
+                <button type="button" onClick={() => toggleMode(idx, true)}
+                  className={`px-2 py-1.5 text-xs transition ${isPercent ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'}`}>
+                  %
+                </button>
+              </div>
+
+              {isPercent ? (
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <input
+                      type="number" min="0" max="100" step="0.5"
+                      value={payout.percentage}
+                      onChange={(e) => updateValue(idx, e.target.value === '' ? '' : Number(e.target.value), 'percentage')}
+                      placeholder="0"
+                      className={`w-20 ${inputCls}`}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">%</span>
+                  </div>
+                  {calcAmount && (
+                    <span className="text-xs text-gray-500">≈ ${calcAmount}</span>
+                  )}
+                </div>
+              ) : (
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={payout.amount_dollars}
+                    onChange={(e) => updateValue(idx, e.target.value === '' ? '' : Number(e.target.value), 'amount_dollars')}
+                    placeholder="0.00"
+                    className={`w-32 pl-7 ${inputCls}`}
+                  />
+                </div>
+              )}
+
+              <button type="button" onClick={() => removePlace(idx)}
+                className="text-gray-600 hover:text-red-400 text-xs transition ml-auto">✕</button>
             </div>
-            <button
-              type="button"
-              onClick={() => removePlace(idx)}
-              className="text-gray-600 hover:text-red-400 text-xs transition"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between mt-4">
-        <button
-          type="button"
-          onClick={addPlace}
-          className="text-xs text-purple-400 hover:text-purple-300 transition"
-        >
+        <button type="button" onClick={addPlace}
+          className="text-xs text-purple-400 hover:text-purple-300 transition">
           + Add place
         </button>
-        {payouts.length > 0 && (
-          <p className="text-xs text-gray-500">
-            Total: <span className="text-white font-medium">${totalPayout.toFixed(2)}</span>
-            {prizePool > 0 && (
-              <span className={`ml-2 ${Math.abs(totalPayout - prizePool) < 0.01 ? 'text-green-400' : 'text-yellow-400'}`}>
-                {Math.abs(totalPayout - prizePool) < 0.01
-                  ? '✓ matches prize pool'
-                  : `(pool: $${prizePool.toFixed(2)})`}
-              </span>
-            )}
-          </p>
-        )}
+        <div className="text-xs text-gray-500 text-right">
+          {totalPct > 0 && (
+            <span className={totalPct === 100 ? 'text-green-400' : totalPct > 100 ? 'text-red-400' : 'text-yellow-400'}>
+              {totalPct}% allocated{totalPct === 100 ? ' ✓' : totalPct > 100 ? ' (over 100%)' : ''}
+            </span>
+          )}
+          {totalFixed > 0 && (
+            <span className="ml-2">Fixed: ${totalFixed.toFixed(2)}</span>
+          )}
+        </div>
       </div>
     </div>
   );

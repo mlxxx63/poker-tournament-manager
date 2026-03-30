@@ -17,6 +17,7 @@ interface DbBlindLevel {
 interface DbPayout {
   position: number;
   amount: number; // cents
+  percentage?: number;
 }
 
 interface Props {
@@ -72,6 +73,7 @@ export default function EditTournamentForm({ tournament, initialLevels, initialP
     initialPayouts.map((p) => ({
       position: p.position,
       amount_dollars: p.amount / 100,
+      percentage: p.percentage ?? 0,
     }))
   );
 
@@ -135,8 +137,8 @@ export default function EditTournamentForm({ tournament, initialLevels, initialP
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(
           payouts
-            .filter((p) => typeof p.amount_dollars === 'number' && p.amount_dollars > 0)
-            .map((p) => ({ position: p.position, amount_dollars: p.amount_dollars }))
+            .filter((p) => (typeof p.percentage === 'number' && p.percentage > 0) || (typeof p.amount_dollars === 'number' && p.amount_dollars > 0))
+            .map((p) => ({ position: p.position, amount_dollars: p.amount_dollars ?? 0, percentage: p.percentage ?? 0 }))
         ),
       });
       if (!payoutsRes.ok) { setError('Failed to save payouts.'); return; }

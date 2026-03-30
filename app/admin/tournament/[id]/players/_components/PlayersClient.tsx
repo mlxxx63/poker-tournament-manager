@@ -200,9 +200,9 @@ export default function PlayersClient({
 
   return (
     <>
-      <main className="flex-1 px-8 py-8 max-w-5xl">
+      <main className="flex-1 px-4 sm:px-8 py-8 max-w-5xl">
         {/* Stats bar */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
             <p className="text-xs text-gray-500 mb-1">Players Remaining</p>
             <p className="text-2xl font-bold text-green-400">{activePlayers.length}</p>
@@ -221,7 +221,7 @@ export default function PlayersClient({
           </div>
         </div>
 
-        <div className="grid grid-cols-[1fr_320px] gap-6">
+        <div className="flex flex-col lg:grid lg:grid-cols-[1fr_320px] gap-6">
           {/* Active players */}
           <div>
             <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden mb-6">
@@ -232,7 +232,7 @@ export default function PlayersClient({
               {activePlayers.length === 0 ? (
                 <p className="px-5 py-6 text-gray-600 text-sm">No active players.</p>
               ) : (
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto"><table className="w-full text-sm">
                   <thead>
                     <tr className="text-gray-500 text-xs uppercase tracking-wide border-b border-gray-800">
                       <th className="text-left px-5 py-2">Name</th>
@@ -301,7 +301,7 @@ export default function PlayersClient({
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               )}
             </div>
 
@@ -311,7 +311,7 @@ export default function PlayersClient({
                 <div className="px-5 py-3.5 border-b border-gray-800">
                   <h2 className="text-sm font-semibold text-gray-200">Eliminated</h2>
                 </div>
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto"><table className="w-full text-sm">
                   <thead>
                     <tr className="text-gray-500 text-xs uppercase tracking-wide border-b border-gray-800">
                       <th className="text-left px-5 py-2">Place</th>
@@ -342,7 +342,7 @@ export default function PlayersClient({
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             )}
           </div>

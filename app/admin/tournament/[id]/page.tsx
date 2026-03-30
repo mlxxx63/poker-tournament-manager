@@ -81,7 +81,7 @@ export default async function TournamentDetailPage({
 
   return (
     <AdminShell>
-      <main className="flex-1 px-8 py-8 max-w-5xl">
+      <main className="flex-1 px-4 sm:px-8 py-8 max-w-5xl">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
@@ -109,7 +109,7 @@ export default async function TournamentDetailPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
             <p className="text-xs text-gray-500 mb-1">Buy-in</p>
             <p className="text-xl font-bold">{formatDollars(tournament.buy_in)}</p>
@@ -124,7 +124,7 @@ export default async function TournamentDetailPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Blind Structure */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             <div className="px-5 py-3.5 border-b border-gray-800">
@@ -227,7 +227,7 @@ export default async function TournamentDetailPage({
         </div>
 
         {/* Action links */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             href={`/admin/tournament/${tournament.id}/live`}
             className="flex items-center justify-between bg-green-900/20 border border-green-900/50 hover:border-green-700/60 rounded-xl p-5 transition group"

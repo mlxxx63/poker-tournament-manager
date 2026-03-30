@@ -13,6 +13,7 @@ export interface BlindLevelRow {
 export interface PayoutRow {
   position: number;
   amount: number; // cents
+  percentage: number;
 }
 
 export interface DisplayState {
@@ -49,8 +50,8 @@ export function getDisplayState(tournamentId: number): DisplayState | null {
     .prepare('SELECT * FROM blind_levels WHERE tournament_id = ? ORDER BY level_number')
     .all(tournamentId) as BlindLevelRow[];
 
-  const payouts = db
-    .prepare('SELECT position, amount FROM payouts WHERE tournament_id = ? ORDER BY position')
+  const rawPayouts = db
+    .prepare('SELECT position, amount, percentage FROM payouts WHERE tournament_id = ? ORDER BY position')
     .all(tournamentId) as PayoutRow[];
 
   const playerStats = db.prepare(`
@@ -96,6 +97,12 @@ export function getDisplayState(tournamentId: number): DisplayState | null {
   }
 
   const totalLevels = blindLevels.filter((l) => !l.is_break).length;
+
+  const payouts: PayoutRow[] = rawPayouts.map((p) => ({
+    position: p.position,
+    percentage: p.percentage ?? 0,
+    amount: (p.percentage ?? 0) > 0 ? Math.round(prizePool * (p.percentage ?? 0) / 100) : p.amount,
+  }));
 
   return {
     id: t.id,

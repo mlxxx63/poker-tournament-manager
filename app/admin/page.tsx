@@ -37,7 +37,7 @@ export default async function AdminDashboard() {
 
   return (
     <AdminShell>
-      <main className="flex-1 px-8 py-8">
+      <main className="flex-1 px-4 sm:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold">Dashboard</h1>
@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Active', value: active.length, color: 'text-green-400' },
             { label: 'Upcoming', value: upcoming.length, color: 'text-purple-400' },
@@ -85,8 +85,8 @@ export default async function AdminDashboard() {
                 <tr className="border-b border-gray-800 text-gray-400 text-xs uppercase tracking-wide">
                   <th className="text-left px-5 py-3">Tournament</th>
                   <th className="text-left px-5 py-3">Date</th>
-                  <th className="text-left px-5 py-3">Buy-in</th>
-                  <th className="text-left px-5 py-3">Chips</th>
+                  <th className="hidden sm:table-cell text-left px-5 py-3">Buy-in</th>
+                  <th className="hidden sm:table-cell text-left px-5 py-3">Chips</th>
                   <th className="text-left px-5 py-3">Status</th>
                   <th className="text-right px-5 py-3">Actions</th>
                 </tr>
@@ -96,8 +96,8 @@ export default async function AdminDashboard() {
                   <tr key={t.id} className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50 transition">
                     <td className="px-5 py-3.5 font-medium text-white">{t.name}</td>
                     <td className="px-5 py-3.5 text-gray-400">{t.date}</td>
-                    <td className="px-5 py-3.5 text-gray-300">{formatDollars(t.buy_in)}</td>
-                    <td className="px-5 py-3.5 text-gray-300">{t.starting_chips.toLocaleString()}</td>
+                    <td className="hidden sm:table-cell px-5 py-3.5 text-gray-300">{formatDollars(t.buy_in)}</td>
+                    <td className="hidden sm:table-cell px-5 py-3.5 text-gray-300">{t.starting_chips.toLocaleString()}</td>
                     <td className="px-5 py-3.5">
                       <span className={`text-xs px-2 py-1 rounded-full font-medium capitalize ${STATUS_STYLES[t.status] ?? STATUS_STYLES.setup}`}>
                         {t.status}

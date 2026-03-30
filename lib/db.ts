@@ -64,6 +64,7 @@ function initializeSchema(db: Database.Database) {
       tournament_id INTEGER NOT NULL,
       position INTEGER NOT NULL,
       amount INTEGER NOT NULL,
+      percentage REAL DEFAULT 0,
       FOREIGN KEY (tournament_id) REFERENCES tournaments(id)
     );
 
@@ -96,6 +97,7 @@ function migrate(db: Database.Database) {
     ['tournaments', 'addon_chips INTEGER DEFAULT 0'],
     ['tournaments', 'addon_cost INTEGER DEFAULT 0'],
     ['tournament_players', 'addons INTEGER DEFAULT 0'],
+    ['payouts', 'percentage REAL DEFAULT 0'],
   ];
 
   for (const [table, columnDef] of newColumns) {

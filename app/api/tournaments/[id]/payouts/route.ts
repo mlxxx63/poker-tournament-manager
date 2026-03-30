@@ -31,15 +31,17 @@ export async function PUT(
   const existing = db.prepare('SELECT id FROM tournaments WHERE id = ?').get(Number(id));
   if (!existing) return NextResponse.json({ error: 'Tournament not found' }, { status: 404 });
 
-  const payouts: { position: number; amount_dollars: number }[] = await req.json();
+  const payouts: { position: number; amount_dollars: number; percentage?: number }[] = await req.json();
 
   db.transaction(() => {
     db.prepare('DELETE FROM payouts WHERE tournament_id = ?').run(Number(id));
     const insert = db.prepare(
-      'INSERT INTO payouts (tournament_id, position, amount) VALUES (?, ?, ?)'
+      'INSERT INTO payouts (tournament_id, position, amount, percentage) VALUES (?, ?, ?, ?)'
     );
     payouts.forEach((p) => {
-      insert.run(Number(id), p.position, Math.round(p.amount_dollars * 100));
+      const percentage = p.percentage ?? 0;
+      const amount = percentage > 0 ? 0 : Math.round(p.amount_dollars * 100);
+      insert.run(Number(id), p.position, amount, percentage);
     });
   })();
 

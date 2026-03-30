@@ -198,10 +198,43 @@ export default function DisplayClient({
         </div>
 
         {/* ── Main 3-column grid ───────────────────────────── */}
-        <div className="flex-1 grid grid-cols-[1fr_2.2fr_1fr] min-h-0">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr_2.2fr_1fr] min-h-0">
 
-          {/* LEFT — payouts + entries */}
-          <div className="border-r-2 border-cyan-400/60 flex flex-col" style={{ background: 'rgba(0,0,0,0.2)' }}>
+          {/* CENTER — timer — first on mobile */}
+          <div className="flex flex-col items-center justify-center px-4 py-6 lg:py-0 order-1 lg:order-2 border-b lg:border-b-0 border-cyan-400/30"
+            style={{ background: 'rgba(0,0,0,0.15)' }}>
+
+            {/* Big timer */}
+            <div
+              className={`font-mono font-black tabular-nums text-white leading-none transition-opacity`}
+              style={{
+                fontSize: 'clamp(4rem, 14vw, 9.5rem)',
+                opacity: isPaused ? 0.35 : 1,
+                textShadow: '0 0 40px rgba(0,220,255,0.3), 0 2px 8px rgba(0,0,0,0.8)',
+              }}
+            >
+              {isSetup ? '--:--' : fmt(s.timerSecondsRemaining)}
+            </div>
+
+            {/* Blinds under timer */}
+            <div className="mt-5 text-center">
+              {isBreak ? (
+                <p className="text-cyan-300 text-xl font-semibold tracking-widest uppercase">Break Time</p>
+              ) : blindsLabel ? (
+                <>
+                  <p className="text-white font-bold tracking-wider" style={{ fontSize: 'clamp(1.4rem, 4vw, 2.5rem)' }}>
+                    {blindsLabel}
+                  </p>
+                  {cur?.ante && cur.ante > 0 ? (
+                    <p className="text-cyan-300/70 text-sm mt-1 tracking-wide">Ante: {cur.ante.toLocaleString()}</p>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          </div>
+
+          {/* LEFT — payouts + blinds — second on mobile */}
+          <div className="order-2 lg:order-1 border-b lg:border-b-0 lg:border-r-2 border-cyan-400/60 flex flex-col" style={{ background: 'rgba(0,0,0,0.2)' }}>
 
             {/* Payout table */}
             <div className="flex-1 px-3 py-3 overflow-hidden">
@@ -251,40 +284,8 @@ export default function DisplayClient({
             </div>
           </div>
 
-          {/* CENTER — timer */}
-          <div className="flex flex-col items-center justify-center py-4 px-2" style={{ background: 'rgba(0,0,0,0.15)' }}>
-
-            {/* Big timer */}
-            <div
-              className={`font-mono font-black tabular-nums text-white leading-none transition-opacity`}
-              style={{
-                fontSize: 'clamp(4rem, 14vw, 9.5rem)',
-                opacity: isPaused ? 0.35 : 1,
-                textShadow: '0 0 40px rgba(0,220,255,0.3), 0 2px 8px rgba(0,0,0,0.8)',
-              }}
-            >
-              {isSetup ? '--:--' : fmt(s.timerSecondsRemaining)}
-            </div>
-
-            {/* Blinds under timer */}
-            <div className="mt-5 text-center">
-              {isBreak ? (
-                <p className="text-cyan-300 text-xl font-semibold tracking-widest uppercase">Break Time</p>
-              ) : blindsLabel ? (
-                <>
-                  <p className="text-white font-bold tracking-wider" style={{ fontSize: 'clamp(1.4rem, 4vw, 2.5rem)' }}>
-                    {blindsLabel}
-                  </p>
-                  {cur?.ante && cur.ante > 0 ? (
-                    <p className="text-cyan-300/70 text-sm mt-1 tracking-wide">Ante: {cur.ante.toLocaleString()}</p>
-                  ) : null}
-                </>
-              ) : null}
-            </div>
-          </div>
-
-          {/* RIGHT — next level info */}
-          <div className="border-l-2 border-cyan-400/60 flex flex-col" style={{ background: 'rgba(0,0,0,0.2)' }}>
+          {/* RIGHT — next level info — third on mobile */}
+          <div className="order-3 lg:order-3 lg:border-l-2 border-cyan-400/60 flex flex-col" style={{ background: 'rgba(0,0,0,0.2)' }}>
 
             <div className="flex-1 px-3 py-3 space-y-1">
               <p className="text-cyan-300 text-xs uppercase tracking-widest border-b border-cyan-400/30 pb-1 mb-2 text-center">

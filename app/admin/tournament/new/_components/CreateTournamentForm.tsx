@@ -43,9 +43,9 @@ export default function CreateTournamentForm() {
 
   // ── Payouts ───────────────────────────────────────────────────────────────
   const [payouts, setPayouts] = useState<Payout[]>([
-    { position: 1, amount_dollars: '' },
-    { position: 2, amount_dollars: '' },
-    { position: 3, amount_dollars: '' },
+    { position: 1, amount_dollars: '', percentage: '' },
+    { position: 2, amount_dollars: '', percentage: '' },
+    { position: 3, amount_dollars: '', percentage: '' },
   ]);
 
   const [submitting, setSubmitting] = useState(false);
@@ -85,8 +85,8 @@ export default function CreateTournamentForm() {
             duration_minutes: l.duration_minutes === '' ? 20 : l.duration_minutes,
           })),
           payouts: payouts
-            .filter((p) => typeof p.amount_dollars === 'number' && p.amount_dollars > 0)
-            .map((p) => ({ position: p.position, amount_dollars: p.amount_dollars })),
+            .filter((p) => (typeof p.percentage === 'number' && p.percentage > 0) || (typeof p.amount_dollars === 'number' && p.amount_dollars > 0))
+            .map((p) => ({ position: p.position, amount_dollars: p.amount_dollars ?? 0, percentage: p.percentage ?? 0 })),
         }),
       });
 

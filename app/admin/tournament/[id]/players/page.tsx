@@ -40,7 +40,7 @@ export default async function PlayersPage({
 
   return (
     <AdminShell>
-      <div className="px-8 py-5 border-b border-gray-800 flex items-center gap-4">
+      <div className="px-4 sm:px-8 py-5 border-b border-gray-800 flex items-center gap-4">
         <Link href={`/admin/tournament/${id}`} className="text-gray-500 hover:text-gray-300 text-sm transition">
           ← {tournament.name}
         </Link>
